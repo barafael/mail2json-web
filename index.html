@@ -2,128 +2,171 @@
 <html>
 
 <head>
-  <meta charset="utf-8" />
-  <title>Markov Chain Nonsense Generator</title>
-  <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+    <meta charset="utf-8" />
+    <title>mail2json-web</title>
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
 </head>
 
 <body>
-  <script type="module">
-    // Importing WASM as a JS module requires us to call an init function provided by the default export.
-    // This is planned to be changed in the future.
-    import { default as wasm, generate_text } from "./pkg/markov_chain_nonsense_generator.js"
+    <script type="module">
+        // Importing WASM as a JS module requires us to call an init function provided by the default export.
+        // This is planned to be changed in the future.
+        import { default as wasm, convert } from "./pkg/mail2json_web_gui.js"
 
-    wasm().then((module) => {
-      // Register onclicks for example input text buttons.
-      document.getElementById("use-bible").onclick = async () => {
-        start_spinning();
-        await set_text_from_url("https://raw.githubusercontent.com/mxw/grmr/master/src/finaltests/bible.txt", "input-text");
-        stop_spinning();
-      }
-      document.getElementById("use-trump").onclick = async () => {
-        start_spinning();
-        await set_text_from_url("https://raw.githubusercontent.com/ryanmcdermott/trump-speeches/master/speeches.txt", "input-text");
-        stop_spinning();
-      }
+        wasm().then((module) => {
+            // Register onclicks for example input text buttons.
+            document.getElementById("example-email-1").onclick = async () => {
+                start_spinning();
+                await set_text_from_url("https://raw.githubusercontent.com/barafael/mail2json/main/test.email", "input-text");
+                stop_spinning();
+            }
+            document.getElementById("example-email-2").onclick = async () => {
+                start_spinning();
+                await set_text_from_url("https://raw.githubusercontent.com/stalwartlabs/mail-parser/main/tests/thirdparty/003.txt", "input-text");
+                stop_spinning();
+            }
+            document.getElementById("example-email-3").onclick = async () => {
+                start_spinning();
+                await set_text_from_url("https://raw.githubusercontent.com/stalwartlabs/mail-parser/main/tests/thirdparty/007.txt", "input-text");
+                stop_spinning();
+            }
+            document.getElementById("example-email-4").onclick = async () => {
+                start_spinning();
+                await set_text_from_url("https://raw.githubusercontent.com/stalwartlabs/mail-parser/main/tests/legacy/045.txt", "input-text");
+                stop_spinning();
+            }
+            document.getElementById("example-email-5").onclick = async () => {
+                start_spinning();
+                await set_text_from_url("https://raw.githubusercontent.com/stalwartlabs/mail-parser/main/tests/malformed/006.txt", "input-text");
+                stop_spinning();
+            }
+            document.getElementById("example-email-6").onclick = async () => {
+                start_spinning();
+                await set_text_from_url("https://raw.githubusercontent.com/stalwartlabs/mail-parser/main/tests/malformed/012.txt", "input-text");
+                stop_spinning();
+            }
 
-      // Register onclick for generate button.
-      document.getElementById("generate-button").onclick = function () {
-        start_spinning();
+            // Register onclick for generate button.
+            document.getElementById("convert-button").onclick = function () {
+                start_spinning();
 
-        let key_size = document.getElementById("key-size").value;
-        if (key_size == "") {
-          key_size = 3;
+                let content = document.getElementById("input-text").value;
+
+                let result = convert(content);
+
+                let json = JSON.parse(result);
+
+                var str = JSON.stringify(json, null, 4);
+
+                document.getElementById("result").innerHTML = syntaxHighlight(str);
+
+                stop_spinning();
+            }
+        });
+
+        // Asynchronously fetches text at url, then sets the element with 'id' value to that text.
+        async function set_text_from_url(url, id) {
+            const response = await fetch(url);
+            const text = await response.text();
+            document.getElementById(id).value = text;
         }
 
-        let output_length = document.getElementById("output-length").value;
-        if (output_length == "") {
-          output_length = 200;
+        function start_spinning() {
+            document.getElementById("spinner").style.opacity = 1;
         }
 
-        let content = document.getElementById("input-text").value;
+        function stop_spinning() {
+            document.getElementById("spinner").style.opacity = 0;
+        }
 
-        let result = generate_text(content, key_size, output_length);
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                    } else {
+                        cls = 'string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+    </script>
 
-        let beautified = strip_to_first_sentence(result);
+    <style>
+        div {
+            padding-top: 10px;
+            padding-right: 10px;
+            padding-bottom: 10px;
+            padding-left: 10px;
+        }
 
-        document.getElementById("result").innerHTML = beautified;
+        .loading-grid {
+            background-color: #F39C12;
+            padding-top: 10px;
+            padding-right: 10px;
+            padding-bottom: 10px;
+            padding-left: 10px;
+            border-radius: 5px;
+            -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.37);
+            box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.37);
+            opacity: 0;
+            transition: opacity 1s;
+        }
 
-        stop_spinning();
-      }
-    });
+        pre {
+            outline: 1px solid #ccc;
+            padding: 5px;
+            margin: 5px;
+            width: 100%;
+        }
 
-    function strip_to_first_sentence(text) {
-      // Match everything from the start up to the first period, and the period itself.
-      const regexp = /^[^\.]*\./;
-      let result = text.replace(regexp, "");
-      return result;
-    }
+        .string {
+            color: green;
+        }
 
-    // Asynchronously fetches text at url, then sets the element with 'id' value to that text.
-    async function set_text_from_url(url, id) {
-      const response = await fetch(url);
-      const text = await response.text();
-      document.getElementById(id).value = text;
-    }
+        .number {
+            color: darkorange;
+        }
 
-    function start_spinning() {
-      document.getElementById("spinner").style.opacity = 1;
-    }
+        .boolean {
+            color: blue;
+        }
 
-    function stop_spinning() {
-      document.getElementById("spinner").style.opacity = 0;
-    }
-  </script>
+        .null {
+            color: magenta;
+        }
 
-  <style>
-    div {
-      padding-top: 10px;
-      padding-right: 10px;
-      padding-bottom: 10px;
-      padding-left: 10px;
-    }
+        .key {
+            color: red;
+        }
+    </style>
 
-    .loading-grid {
-      background-color: #F39C12;
-      padding-top: 10px;
-      padding-right: 10px;
-      padding-bottom: 10px;
-      padding-left: 10px;
-      border-radius: 5px;
-      -moz-box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.37);
-      box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.37);
-      opacity: 0;
-      transition: opacity 1s;
-    }
-  </style>
+    <div>
+        <button id="example-email-1" type="button">Load example email file 1</button>
+        <button id="example-email-2" type="button">Load example email file 2</button>
+        <button id="example-email-3" type="button">Load example email file 3</button>
+        <button id="example-email-4" type="button">Load example email file 4</button>
+        <button id="example-email-5" type="button">Load malformed example 1</button>
+        <button id="example-email-6" type="button">Load malformed example 2</button>
+        <img src="grid.svg" width="40" alt="grid loader anim" class="loading-grid" id="spinner" display="none">
+    </div>
 
+    <div>
+        <textarea id="input-text"></textarea>
+    </div>
 
-  <div>
-    <button id="use-bible" type="button">Use Bible as input</button>
-    <button id="use-trump" type="button">Use Trump speeches as input</button>
+    <div>
+        <button id="convert-button" type="button">Convert</button>
+    </div>
 
-    <img src="grid.svg" width="40" alt="grid loader anim" class="loading-grid" id="spinner" display="none">
-  </div>
-
-  <div>
-    <textarea id="input-text"></textarea>
-  </div>
-
-  <div>
-    <label for="key-size">Key size:</label>
-    <input type="number" id="key-size" name="key-size" min="1" max="20" value="3">
-  </div>
-
-  <div>
-    <label for="output-length">Output text length:</label>
-    <input type="number" id="output-length" name="output-length" min="1" max="2000" value="200">
-  </div>
-
-  <div>
-    <button id="generate-button" type="button">Generate</button>
-  </div>
-
-  <p id="result"></p>
+    <pre id="result"></pre>
 </body>
 
 </html>

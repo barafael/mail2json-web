@@ -1,5 +1,5 @@
 [package]
-name = "markov-chain-nonsense-generator"
+name = "mail2json-web-gui"
 version = "0.1.0"
 authors = ["Rafael Bachmann <rafael.bachmann@esrlabs.com>"]
 edition = "2018"
@@ -27,7 +27,8 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 #
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4.5", optional = true }
-snarky-parrot = "0.2.0"
+serde_json = "1.0.68"
+mail-parser = "0.2.1"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.26"

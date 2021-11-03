@@ -1,5 +1,6 @@
 mod utils;
 
+use mail_parser::Message;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -9,7 +10,7 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-pub fn generate_text(data: &str, rule_length: usize, result_length: usize) -> String {
-    let rule = snarky_parrot::generate_rule_from_data(data, rule_length).unwrap();
-    snarky_parrot::generate_text(&rule, result_length)
+pub fn convert(input: &str) -> String {
+    let message = Message::parse(input.as_bytes());
+    return serde_json::to_string_pretty(&message).unwrap_or_default();
 }

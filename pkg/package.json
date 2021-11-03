@@ -1,15 +1,15 @@
 {
-  "name": "markov-chain-nonsense-generator",
+  "name": "mail2json-web-gui",
   "collaborators": [
     "Rafael Bachmann <rafael.bachmann@esrlabs.com>"
   ],
   "version": "0.1.0",
   "files": [
-    "markov_chain_nonsense_generator_bg.wasm",
-    "markov_chain_nonsense_generator.js",
-    "markov_chain_nonsense_generator.d.ts"
+    "mail2json_web_gui_bg.wasm",
+    "mail2json_web_gui.js",
+    "mail2json_web_gui.d.ts"
   ],
-  "module": "markov_chain_nonsense_generator.js",
-  "types": "markov_chain_nonsense_generator.d.ts",
+  "module": "mail2json_web_gui.js",
+  "types": "mail2json_web_gui.d.ts",
   "sideEffects": false
 }

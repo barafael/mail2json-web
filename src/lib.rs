@@ -1,5 +1,3 @@
-mod utils;
-
 use mail_parser::Message;
 use wasm_bindgen::prelude::*;
 
@@ -12,5 +10,5 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 pub fn convert(input: &str) -> String {
     let message = Message::parse(input.as_bytes());
-    return serde_json::to_string_pretty(&message).unwrap_or_default();
+    serde_json::to_string_pretty(&message).unwrap_or_default()
 }
